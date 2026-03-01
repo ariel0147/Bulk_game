@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>משחק תפזורת - מילים ואתגרים</title>
     <link rel="stylesheet" href="Bulk_game.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 <div class="game-container">
@@ -26,10 +27,22 @@
         <div class="stats-container">
             <div class="stat-box">זמן: <span id="timer">03:00</span></div>
             <div class="stat-box">ניקוד: <span id="score">0</span></div>
+            <div class="stat-box" style="color:#FFD700; border-color:#FFD700;">שיא: <span id="high-score">0</span></div>
         </div>
 
         <div id="grid" class="grid"></div>
         <div id="word-list" class="word-list"></div>
+    </div>
+</div>
+
+<div id="victory-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>🏆 כול הכבוד! 🏆</h2>
+        <p>סיימת את כל המילים!</p>
+        <p>ניקוד סופי: <span id="final-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
+        <p id="new-record-msg" class="hidden">🎉 שיא חדש! 🎉</p>
+        <br>
+        <button id="play-again-btn" class="neon-btn">שחק שוב</button>
     </div>
 </div>
 

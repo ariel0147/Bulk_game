@@ -8,16 +8,14 @@ const categories = {
     animals: ['כלב', 'חתול', 'אריה', 'נמר', 'פיל', 'קוף', 'גירפה', 'זאב', 'דוב', 'נשר', 'דולפין', 'לוויתן', 'כריש', 'תוכי', 'נחש']
 };
 
-// הקישורים לתמונות הרקע לפי קטגוריה!
-// הקישורים לתמונות הרקע המשופרות - כולל איצ'יגו מבליץ'!
+// הקישורים לתמונות הרקע
 const backgrounds = {
-    programming: 'url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop")', // קוד ירוק מטריקס
-    // תמונת בנקאי עוצמתית של איצ'יגו מבליץ'
-    anime: 'url("https://images.wallpapersden.com/image/download/ichigo-kurosaki-hollow-mask-bleach_bWdpZ26UmZqaraWkpJRmbmdlrWZnZWU.jpg")',
-    cars: 'url("https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=2000&auto=format&fit=crop")', // רכב ספורט ניאון
-    gaming: 'url("https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2000&auto=format&fit=crop")', // אווירת גיימינג
-    food: 'url("https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2000&auto=format&fit=crop")', // פיצה/אוכל רחוב
-    animals: 'url("https://images.unsplash.com/photo-1564349683136-77e08bef1ed4?q=80&w=2000&auto=format&fit=crop")' // פנדה/חיות
+    programming: 'url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop")',
+    anime: 'url("anime.jpg")', // תמונת הרוחב של האנימה
+    cars: 'url("https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop")',
+    gaming: 'url("https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2000&auto=format&fit=crop")',
+    food: 'url("https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2000&auto=format&fit=crop")',
+    animals: 'url("https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2000&auto=format&fit=crop")'
 };
 
 let wordsToFind = [];
@@ -29,6 +27,17 @@ const scoreElement = document.getElementById('score');
 const categorySelect = document.getElementById('category-select');
 const gameArea = document.getElementById('game-area');
 const newGameBtn = document.getElementById('new-game-btn');
+
+// אלמנטים חדשים למודל הניצחון והשיאים
+const highScoreElement = document.getElementById('high-score');
+const victoryModal = document.getElementById('victory-modal');
+const finalScoreElement = document.getElementById('final-score');
+const playAgainBtn = document.getElementById('play-again-btn');
+const newRecordMsg = document.getElementById('new-record-msg');
+
+// טעינת השיא הלוקאלי (localStorage) מהדפדפן
+let currentHighScore = localStorage.getItem('bulkGameHighScore') || 0;
+if (highScoreElement) highScoreElement.textContent = currentHighScore;
 
 let gridMatrix = [];
 let isDragging = false;
@@ -42,11 +51,11 @@ let timerInterval = null;
 let isGameActive = false;
 let hasGameStarted = false;
 
-// --- מערכת סאונד מקצועית למשחקים (Web Audio API) ---
+// --- מערכת סאונד ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
 const soundSettings = {
-    tick: { volume: 0.3, offset: 1.0 }, // האופסט שלך שסידר את הדיליי!
+    tick: { volume: 0.3, offset: 1.0 },
     found: { volume: 0.7, offset: 0 },
     error: { volume: 0.5, offset: 0 },
     win: { volume: 1.0, offset: 0 }
@@ -63,7 +72,6 @@ async function loadSound(name, url) {
     }
 }
 
-// נתיבים מקומיים כפי שהגדרנו מקודם
 loadSound('tick', 'sounds/tick.mp3');
 loadSound('found', 'sounds/found.mp3');
 loadSound('error', 'sounds/error.mp3');
@@ -85,7 +93,6 @@ function playSound(name) {
     }
 }
 
-// פונקציה שמחליפה את הרקע של המסך לפי הקטגוריה
 function updateBackground() {
     const selectedCategory = categorySelect.value;
     document.body.style.backgroundImage = backgrounds[selectedCategory];
@@ -188,13 +195,57 @@ function fillEmptySpacesAndRender() {
             cell.dataset.row = row;
             cell.dataset.col = col;
 
+            // תמיכה בעכבר ומגע לטלפונים
             cell.addEventListener('mousedown', handleMouseDown);
             cell.addEventListener('mouseover', handleMouseOver);
+            cell.addEventListener('touchstart', handleTouchStart, { passive: false });
+
             gridElement.appendChild(cell);
         }
     }
 }
 
+// פונקציה לבדיקת החלקה ובחירה (למגע ולעכבר)
+function processCellSelection(currentCell) {
+    if (!startCell) return;
+    const startRow = parseInt(startCell.dataset.row);
+    const startCol = parseInt(startCell.dataset.col);
+    const currRow = parseInt(currentCell.dataset.row);
+    const currCol = parseInt(currentCell.dataset.col);
+
+    const rowDiff = currRow - startRow;
+    const colDiff = currCol - startCol;
+
+    const isHorizontal = rowDiff === 0;
+    const isVertical = colDiff === 0;
+    const isDiagonal = Math.abs(rowDiff) === Math.abs(colDiff);
+
+    if (isHorizontal || isVertical || isDiagonal) {
+        document.querySelectorAll('.cell.selected').forEach(cell => {
+            if (!cell.classList.contains('found')) cell.classList.remove('selected');
+        });
+
+        const oldLength = selectedCells.length;
+        selectedCells = [];
+
+        const rowStep = rowDiff === 0 ? 0 : rowDiff / Math.abs(rowDiff);
+        const colStep = colDiff === 0 ? 0 : colDiff / Math.abs(colDiff);
+        const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+
+        for (let i = 0; i <= steps; i++) {
+            const r = startRow + (i * rowStep);
+            const c = startCol + (i * colStep);
+            const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+                selectedCells.push(cell);
+            }
+        }
+        if (selectedCells.length !== oldLength) playSound('tick');
+    }
+}
+
+// ניהול אירועי עכבר
 function handleMouseDown(e) {
     if (!isGameActive) return;
     if (e.target.classList.contains('cell')) {
@@ -207,48 +258,30 @@ function handleMouseDown(e) {
 }
 
 function handleMouseOver(e) {
+    if (!isGameActive || !isDragging) return;
+    if (e.target.classList.contains('cell')) processCellSelection(e.target);
+}
+
+// ניהול אירועי מגע (לטלפון)
+function handleTouchStart(e) {
     if (!isGameActive) return;
-    if (isDragging && e.target.classList.contains('cell')) {
-        const currentCell = e.target;
-        const startRow = parseInt(startCell.dataset.row);
-        const startCol = parseInt(startCell.dataset.col);
-        const currRow = parseInt(currentCell.dataset.row);
-        const currCol = parseInt(currentCell.dataset.col);
+    if (e.target.classList.contains('cell')) {
+        e.preventDefault();
+        isDragging = true;
+        startCell = e.target;
+        selectedCells = [startCell];
+        startCell.classList.add('selected');
+        playSound('tick');
+    }
+}
 
-        const rowDiff = currRow - startRow;
-        const colDiff = currCol - startCol;
-
-        const isHorizontal = rowDiff === 0;
-        const isVertical = colDiff === 0;
-        const isDiagonal = Math.abs(rowDiff) === Math.abs(colDiff);
-
-        if (isHorizontal || isVertical || isDiagonal) {
-            document.querySelectorAll('.cell.selected').forEach(cell => {
-                if (!cell.classList.contains('found')) {
-                    cell.classList.remove('selected');
-                }
-            });
-
-            const oldLength = selectedCells.length;
-            selectedCells = [];
-
-            const rowStep = rowDiff === 0 ? 0 : rowDiff / Math.abs(rowDiff);
-            const colStep = colDiff === 0 ? 0 : colDiff / Math.abs(colDiff);
-            const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
-
-            for (let i = 0; i <= steps; i++) {
-                const r = startRow + (i * rowStep);
-                const c = startCol + (i * colStep);
-                const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-                if (cell) {
-                    cell.classList.add('selected');
-                    selectedCells.push(cell);
-                }
-            }
-            if (selectedCells.length !== oldLength) {
-                playSound('tick');
-            }
-        }
+function handleTouchMove(e) {
+    if (!isGameActive || !isDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const targetCell = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (targetCell && targetCell.classList.contains('cell')) {
+        processCellSelection(targetCell);
     }
 }
 
@@ -290,7 +323,25 @@ function checkSelectedWord() {
                 scoreElement.textContent = score;
 
                 playSound('win');
-                setTimeout(() => alert(`🏆 אלף מברוק! סיימת את כל המילים!\nניקוד בסיסי + בונוס זמן: ${score} נקודות!`), 500);
+
+                // אפקט קונפטי לניצחון
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+                // שמירת שיאים הלוקאלית
+                finalScoreElement.textContent = score;
+                if (score > currentHighScore) {
+                    currentHighScore = score;
+                    localStorage.setItem('bulkGameHighScore', currentHighScore);
+                    highScoreElement.textContent = currentHighScore;
+                    newRecordMsg.classList.remove('hidden');
+                } else {
+                    newRecordMsg.classList.add('hidden');
+                }
+
+                // הצגת המודל במקום האזהרה הישנה (alert)
+                setTimeout(() => {
+                    victoryModal.classList.remove('hidden');
+                }, 400);
             } else {
                 playSound('found');
             }
@@ -344,12 +395,11 @@ function startGameFlow() {
     initGame();
 }
 
-// מעדכנים את הרקע כבר כשהדף עולה בפעם הראשונה
+// קריאה ראשונית לעדכון רקע
 updateBackground();
 
 newGameBtn.addEventListener('click', startGameFlow);
 
-// כשמשנים קטגוריה - מעדכנים את הרקע!
 categorySelect.addEventListener('change', () => {
     updateBackground();
     if (hasGameStarted) {
@@ -357,4 +407,13 @@ categorySelect.addEventListener('change', () => {
     }
 });
 
+// מאזין לכפתור "שחק שוב" בתוך המודל
+playAgainBtn.addEventListener('click', () => {
+    victoryModal.classList.add('hidden');
+    startGameFlow();
+});
+
+// מאזינים לשחרור האצבע או העכבר בסיום הגרירה
 document.addEventListener('mouseup', handleMouseUp);
+gridElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+document.addEventListener('touchend', handleMouseUp);
