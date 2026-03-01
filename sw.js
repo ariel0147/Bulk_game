@@ -1,11 +1,12 @@
-const CACHE_NAME = 'bulk-game-v1';
+const CACHE_NAME = 'bulk-game-v3'; // העלינו לגרסה 3 כדי לרענן את הזיכרון
 const urlsToCache = [
     './',
     './Bulk_game.html',
     './Bulk_game.css',
     './Bulk_game.js',
     './manifest.json',
-    './anime.jpg',
+    './icon-192.png',
+    './icon-512.png',
     './sounds/tick.mp3',
     './sounds/found.mp3',
     './sounds/error.mp3',
@@ -25,7 +26,6 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // מחזיר את הקובץ מהזיכרון במידה וקיים, אחרת מוריד מהרשת
                 return response || fetch(event.request);
             })
     );
