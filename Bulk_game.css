@@ -32,6 +32,8 @@ body {
     margin-bottom: 15px;
     padding: 0 10px;
     direction: rtl;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .stat-box {
@@ -50,12 +52,19 @@ body {
     margin-right: 5px;
 }
 
+.strikes-box {
+    color: #FF0055;
+    border-color: #FF0055;
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+}
+
 .controls-container {
     display: flex;
     gap: 15px;
     justify-content: center;
     align-items: center;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .neon-select {
@@ -103,6 +112,18 @@ body {
     box-shadow: 0 0 30px rgba(0, 255, 170, 0.8), inset 0 0 20px rgba(0, 255, 170, 0.6);
 }
 
+.hint-btn {
+    color: #FFD700;
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.hint-btn:hover {
+    background: #FFD700;
+    color: #000;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(12, 32px);
@@ -142,6 +163,13 @@ body {
     z-index: 10;
 }
 
+.cell.hinted {
+    background: rgba(255, 215, 0, 0.5);
+    border-color: #FFD700;
+    box-shadow: 0 0 15px #FFD700;
+    animation: popUp 1s infinite alternate;
+}
+
 .word-list {
     display: flex;
     flex-wrap: wrap;
@@ -173,6 +201,16 @@ body {
     100% { transform: scale(1); }
 }
 
+@keyframes flashRed {
+    0% { background-color: rgba(0, 0, 0, 0.6); color: white; }
+    50% { background-color: #FF0055; color: white; box-shadow: 0 0 30px #FF0055; }
+    100% { background-color: rgba(0, 0, 0, 0.6); color: white; }
+}
+
+.time-penalty {
+    animation: flashRed 0.5s ease-out;
+}
+
 .cell.found {
     background: #00FFAA;
     color: #000;
@@ -186,7 +224,7 @@ body {
     background: rgba(0, 255, 170, 0.15);
     border-color: rgba(0, 255, 170, 0.5);
     text-shadow: 0 0 8px rgba(0, 255, 170, 0.8);
-    animation: popUp 0.4s ease-out; /* הפעלת האנימציה הקופצת */
+    animation: popUp 0.4s ease-out;
 }
 
 /* --- מודל הניצחון --- */
@@ -219,18 +257,19 @@ body {
 @media (max-width: 600px) {
     .game-container { padding: 10px; width: 95vw; }
     .stats-container {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
         align-items: center;
+        justify-content: center;
     }
+    .stat-box { font-size: 14px; padding: 6px 10px; }
     .grid {
-        grid-template-columns: repeat(12, minmax(22px, 7vw));
+        grid-template-columns: repeat(12, minmax(22px, 7.5vw));
         gap: 2px;
     }
     .cell {
-        width: 7vw;
-        height: 7vw;
+        width: 7.5vw;
+        height: 7.5vw;
         font-size: 14px;
     }
-    .controls-container { flex-direction: column; }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "תפזורת מילים",
+  "short_name": "תפזורת",
+  "start_url": "./Bulk_game.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "anime.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

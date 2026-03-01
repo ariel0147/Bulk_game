@@ -4,14 +4,13 @@ const categories = {
     anime: ['איצגו', 'רוקיה', 'בנקאי', 'הולו', 'שיניגאמי', 'נארוטו', 'סאסקה', 'לופי', 'זורו', 'אנימציה', 'מנגה', 'טוקיו', 'גוקו', 'סליים', 'פנטזיה', 'קוספליי'],
     cars: ['מנוע', 'הילוכים', 'בלמים', 'הגה', 'כביש', 'יונדאי', 'ולוסטר', 'אגזוז', 'מפתח', 'גלגל', 'צמיג', 'מהירות', 'דלק', 'שמן', 'טורבו', 'מצבר', 'מוסך'],
     gaming: ['קונסולה', 'שלט', 'מקלדת', 'עכבר', 'פינג', 'לאג', 'סנייפר', 'בוס', 'לוט', 'סקין', 'קווסט', 'שחקן', 'מולטיפלייר', 'ראנק'],
-    food: ['פיצה', 'המבורגר', 'פסטה', 'סלט', 'שוקולד', 'גלידה', 'סושי', 'סטייק', 'צופס', 'עוגה', 'לחם', 'גבינה', 'בשר', 'פירות'],
+    food: ['פיצה', 'המבורגר', 'פסטה', 'סלט', 'שוקולד', 'גלידה', 'סושי', 'סטייק', 'ציפס', 'עוגה', 'לחם', 'גבינה', 'בשר', 'פירות'],
     animals: ['כלב', 'חתול', 'אריה', 'נמר', 'פיל', 'קוף', 'גירפה', 'זאב', 'דוב', 'נשר', 'דולפין', 'לוויתן', 'כריש', 'תוכי', 'נחש']
 };
 
-// הקישורים לתמונות הרקע
 const backgrounds = {
     programming: 'url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop")',
-    anime: 'url("anime.jpg")', // תמונת הרוחב של האנימה
+    anime: 'url("anime.jpg")',
     cars: 'url("https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop")',
     gaming: 'url("https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2000&auto=format&fit=crop")',
     food: 'url("https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2000&auto=format&fit=crop")',
@@ -19,23 +18,25 @@ const backgrounds = {
 };
 
 let wordsToFind = [];
+let placedWordsInfo = {}; // ישמור את המיקום של האות הראשונה של כל מילה
+
 const gridSize = 12;
 const gridElement = document.getElementById('grid');
 const wordListElement = document.getElementById('word-list');
 const timerElement = document.getElementById('timer');
 const scoreElement = document.getElementById('score');
+const strikesElement = document.getElementById('strikes');
 const categorySelect = document.getElementById('category-select');
 const gameArea = document.getElementById('game-area');
 const newGameBtn = document.getElementById('new-game-btn');
+const hintBtn = document.getElementById('hint-btn');
 
-// אלמנטים חדשים למודל הניצחון והשיאים
 const highScoreElement = document.getElementById('high-score');
 const victoryModal = document.getElementById('victory-modal');
 const finalScoreElement = document.getElementById('final-score');
 const playAgainBtn = document.getElementById('play-again-btn');
 const newRecordMsg = document.getElementById('new-record-msg');
 
-// טעינת השיא הלוקאלי (localStorage) מהדפדפן
 let currentHighScore = localStorage.getItem('bulkGameHighScore') || 0;
 if (highScoreElement) highScoreElement.textContent = currentHighScore;
 
@@ -47,6 +48,7 @@ let startCell = null;
 
 let timeLeft = 180;
 let score = 0;
+let strikes = 0;
 let timerInterval = null;
 let isGameActive = false;
 let hasGameStarted = false;
@@ -104,6 +106,14 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
+function applyTimePenalty(amount) {
+    timeLeft -= amount;
+    if (timeLeft <= 0) timeLeft = 0;
+    timerElement.textContent = formatTime(timeLeft);
+    timerElement.parentElement.classList.add('time-penalty');
+    setTimeout(() => timerElement.parentElement.classList.remove('time-penalty'), 500);
+}
+
 function startTimer() {
     clearInterval(timerInterval);
     timeLeft = 180;
@@ -111,7 +121,7 @@ function startTimer() {
     isGameActive = true;
 
     timerInterval = setInterval(() => {
-        timeLeft--;
+        if (timeLeft > 0) timeLeft--;
         timerElement.textContent = formatTime(timeLeft);
 
         if (timeLeft <= 0) {
@@ -131,6 +141,7 @@ function pickRandomWords(numWords) {
 
 function initializeMatrix() {
     gridMatrix = [];
+    placedWordsInfo = {};
     for (let i = 0; i < gridSize; i++) {
         gridMatrix[i] = new Array(gridSize).fill('');
     }
@@ -168,6 +179,9 @@ function placeWord(word) {
         let col = Math.floor(Math.random() * gridSize);
 
         if (canPlaceWord(word, row, col, dir)) {
+            // שמירת המיקום בשביל הרמז
+            placedWordsInfo[word] = { startRow: row, startCol: col };
+
             for (let i = 0; i < word.length; i++) {
                 if (dir === 'horizontal') gridMatrix[row][col + i] = word[i];
                 else if (dir === 'vertical') gridMatrix[row + i][col] = word[i];
@@ -195,7 +209,6 @@ function fillEmptySpacesAndRender() {
             cell.dataset.row = row;
             cell.dataset.col = col;
 
-            // תמיכה בעכבר ומגע לטלפונים
             cell.addEventListener('mousedown', handleMouseDown);
             cell.addEventListener('mouseover', handleMouseOver);
             cell.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -205,7 +218,6 @@ function fillEmptySpacesAndRender() {
     }
 }
 
-// פונקציה לבדיקת החלקה ובחירה (למגע ולעכבר)
 function processCellSelection(currentCell) {
     if (!startCell) return;
     const startRow = parseInt(startCell.dataset.row);
@@ -245,7 +257,6 @@ function processCellSelection(currentCell) {
     }
 }
 
-// ניהול אירועי עכבר
 function handleMouseDown(e) {
     if (!isGameActive) return;
     if (e.target.classList.contains('cell')) {
@@ -262,7 +273,6 @@ function handleMouseOver(e) {
     if (e.target.classList.contains('cell')) processCellSelection(e.target);
 }
 
-// ניהול אירועי מגע (לטלפון)
 function handleTouchStart(e) {
     if (!isGameActive) return;
     if (e.target.classList.contains('cell')) {
@@ -307,6 +317,7 @@ function checkSelectedWord() {
 
             selectedCells.forEach(cell => {
                 cell.classList.remove('selected');
+                cell.classList.remove('hinted');
                 cell.classList.add('found');
             });
 
@@ -323,11 +334,8 @@ function checkSelectedWord() {
                 scoreElement.textContent = score;
 
                 playSound('win');
-
-                // אפקט קונפטי לניצחון
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
-                // שמירת שיאים הלוקאלית
                 finalScoreElement.textContent = score;
                 if (score > currentHighScore) {
                     currentHighScore = score;
@@ -338,7 +346,6 @@ function checkSelectedWord() {
                     newRecordMsg.classList.add('hidden');
                 }
 
-                // הצגת המודל במקום האזהרה הישנה (alert)
                 setTimeout(() => {
                     victoryModal.classList.remove('hidden');
                 }, 400);
@@ -349,8 +356,16 @@ function checkSelectedWord() {
     }
 
     if (!foundMatch) {
-        if (selectedCells.length > 1) {
+        if (selectedCells.length > 1) { // רק אם באמת גררו שגיאה
             playSound('error');
+            strikes++;
+            strikesElement.textContent = `${strikes}/3`;
+
+            if (strikes >= 3) {
+                applyTimePenalty(15); // עונש של 15 שניות על 3 פסילות
+                strikes = 0;
+                strikesElement.textContent = `${strikes}/3`;
+            }
         }
         document.querySelectorAll('.cell.selected').forEach(cell => {
             if (!cell.classList.contains('found')) {
@@ -360,6 +375,33 @@ function checkSelectedWord() {
     }
     selectedCells = [];
 }
+
+// פונקציית רמזים
+hintBtn.addEventListener('click', () => {
+    if (!isGameActive) return;
+
+    // מציאת המילים שעוד לא נמצאו
+    const unfoundWords = wordsToFind.filter(word => {
+        const wordEl = document.getElementById(`word-${word}`);
+        return wordEl && !wordEl.classList.contains('found');
+    });
+
+    if (unfoundWords.length > 0) {
+        applyTimePenalty(20); // הורדת 20 שניות
+
+        // בחירת מילה אחת באקראי מהמילים שנשארו
+        const randomWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
+        const info = placedWordsInfo[randomWord];
+
+        if (info) {
+            const cell = document.querySelector(`.cell[data-row="${info.startRow}"][data-col="${info.startCol}"]`);
+            if (cell && !cell.classList.contains('found')) {
+                cell.classList.add('hinted');
+                playSound('tick');
+            }
+        }
+    }
+});
 
 function renderWordList() {
     wordListElement.innerHTML = '';
@@ -375,7 +417,12 @@ function renderWordList() {
 function initGame() {
     wordFoundCount = 0;
     score = 0;
+    strikes = 0;
     scoreElement.textContent = score;
+    strikesElement.textContent = `${strikes}/3`;
+
+    // ניקוי רמזים אם היו ממשחק קודם
+    document.querySelectorAll('.cell.hinted').forEach(c => c.classList.remove('hinted'));
 
     pickRandomWords(10);
     initializeMatrix();
@@ -390,12 +437,12 @@ function startGameFlow() {
     if (!hasGameStarted) {
         hasGameStarted = true;
         gameArea.classList.remove('hidden');
+        hintBtn.classList.remove('hidden');
         newGameBtn.textContent = 'משחק חדש';
     }
     initGame();
 }
 
-// קריאה ראשונית לעדכון רקע
 updateBackground();
 
 newGameBtn.addEventListener('click', startGameFlow);
@@ -407,13 +454,11 @@ categorySelect.addEventListener('change', () => {
     }
 });
 
-// מאזין לכפתור "שחק שוב" בתוך המודל
 playAgainBtn.addEventListener('click', () => {
     victoryModal.classList.add('hidden');
     startGameFlow();
 });
 
-// מאזינים לשחרור האצבע או העכבר בסיום הגרירה
 document.addEventListener('mouseup', handleMouseUp);
 gridElement.addEventListener('touchmove', handleTouchMove, { passive: false });
 document.addEventListener('touchend', handleMouseUp);
