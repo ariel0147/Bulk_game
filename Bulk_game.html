@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק תפזורת - מילים ואתגרים</title>
+    <link rel="stylesheet" href="Bulk_game.css">
+</head>
+<body>
+<div class="game-container">
+    <h1>תפזורת מילים</h1>
+
+    <div class="controls-container">
+        <select id="category-select" class="neon-select">
+            <option value="programming">תכנות ומטריקס</option>
+            <option value="anime">אנימה ופנטזיה</option>
+            <option value="cars">רכבים ומוטוריקה</option>
+            <option value="gaming">גיימינג ו-E-Sports</option>
+            <option value="food">אוכל ומסעדות</option>
+            <option value="animals">עולם החי</option>
+        </select>
+        <button id="new-game-btn" class="neon-btn">התחל משחק</button>
+    </div>
+
+    <div id="game-area" class="hidden">
+        <div class="stats-container">
+            <div class="stat-box">זמן: <span id="timer">03:00</span></div>
+            <div class="stat-box">ניקוד: <span id="score">0</span></div>
+        </div>
+
+        <div id="grid" class="grid"></div>
+        <div id="word-list" class="word-list"></div>
+    </div>
+</div>
+
+<script src="Bulk_game.js"></script>
+</body>
+</html>
