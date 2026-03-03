@@ -16,19 +16,29 @@ const backgrounds = {
     animals: 'url("https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2000&auto=format&fit=crop")'
 };
 
+// --- משתני השלבים והמשחק ---
+let currentLevel = parseInt(localStorage.getItem('bulkGameLevel')) || 1;
+let gridSize = 10;
+let levelWordsCount = 4;
+let levelTimeLeft = 180;
+let allowedDirections = [];
+let strikesToPenalty = 3;
+let currentPenaltySeconds = 5;
+
 let wordsToFind = [];
 let placedWordsInfo = {};
 
-const gridSize = 12;
 const gridElement = document.getElementById('grid');
 const wordListElement = document.getElementById('word-list');
 const timerElement = document.getElementById('timer');
 const scoreElement = document.getElementById('score');
 const strikesElement = document.getElementById('strikes');
+const levelDisplayElement = document.getElementById('level-display');
 const categorySelect = document.getElementById('category-select');
 const gameArea = document.getElementById('game-area');
 const newGameBtn = document.getElementById('new-game-btn');
 const hintBtn = document.getElementById('hint-btn');
+const resetLevelBtn = document.getElementById('reset-level-btn');
 
 const highScoreElement = document.getElementById('high-score');
 const victoryModal = document.getElementById('victory-modal');
@@ -53,12 +63,13 @@ let wordFoundCount = 0;
 let startCell = null;
 
 let timeLeft = 180;
-let score = 0;
+let score = 0; // הניקוד נצבר בין השלבים עד שיוצאים
 let strikes = 0;
 let timerInterval = null;
 let isGameActive = false;
 let hasGameStarted = false;
 
+// --- סאונדים ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
 const soundSettings = {
@@ -78,7 +89,6 @@ async function loadSound(name, url) {
         console.error(`שגיאה בטעינת סאונד ${name}:`, e);
     }
 }
-
 loadSound('tick', 'sounds/tick.mp3');
 loadSound('found', 'sounds/found.mp3');
 loadSound('error', 'sounds/error.mp3');
@@ -86,9 +96,7 @@ loadSound('win', 'sounds/win.mp3');
 
 function playSound(name) {
     if (audioBuffers[name]) {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const source = audioCtx.createBufferSource();
         source.buffer = audioBuffers[name];
         const gainNode = audioCtx.createGain();
@@ -111,6 +119,54 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
+// --- לוגיקת השלבים ---
+function setupLevelParameters() {
+    if (currentLevel <= 3) {
+        // רמת מתחילים
+        gridSize = 10;
+        levelWordsCount = 4 + (currentLevel - 1); // שלב 1: 4, שלב 2: 5, שלב 3: 6
+        levelTimeLeft = 180;
+        allowedDirections = ['horizontal', 'vertical'];
+        strikesToPenalty = 3;
+        currentPenaltySeconds = 5;
+    } else if (currentLevel <= 7) {
+        // רמה בינונית
+        gridSize = 12;
+        levelWordsCount = 7 + (currentLevel - 4); // מגיע עד 10 מילים
+        levelTimeLeft = Math.max(105, 150 - ((currentLevel - 4) * 15)); // יורד עד 105 שניות
+        allowedDirections = ['horizontal', 'vertical', 'diagonal', 'diagonal-up'];
+        strikesToPenalty = 3;
+        currentPenaltySeconds = 10;
+    } else {
+        // רמה מתקדמת
+        gridSize = 14;
+        levelWordsCount = 12 + (currentLevel - 8);
+        levelTimeLeft = 90; // זמן קצר מאוד, אבל מקבלים תוספת של 5 שניות למילה
+        allowedDirections = ['horizontal', 'vertical', 'diagonal', 'diagonal-up', 'horizontal-rev', 'vertical-rev', 'diagonal-rev', 'diagonal-up-rev'];
+        strikesToPenalty = 1; // העונש מיידי!
+        currentPenaltySeconds = 5;
+    }
+
+    // הגבלת המילים לכמות המקסימלית שיש בקטגוריה
+    const maxCategoryWords = categories[categorySelect.value].length;
+    if (levelWordsCount > maxCategoryWords) levelWordsCount = maxCategoryWords;
+
+    levelDisplayElement.textContent = currentLevel;
+    hintBtn.textContent = `💡 רמז (-${currentPenaltySeconds * 2} ש')`;
+    updateGridCSS();
+}
+
+function updateGridCSS() {
+    if (window.innerWidth <= 600) {
+        gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    } else {
+        const cellSize = gridSize >= 14 ? '26px' : (gridSize === 12 ? '32px' : '38px');
+        gridElement.style.gridTemplateColumns = `repeat(${gridSize}, ${cellSize})`;
+    }
+}
+
+window.addEventListener('resize', () => { if(hasGameStarted) updateGridCSS(); });
+
 function applyTimePenalty(amount) {
     timeLeft -= amount;
     if (timeLeft <= 0) timeLeft = 0;
@@ -119,9 +175,16 @@ function applyTimePenalty(amount) {
     setTimeout(() => timerElement.parentElement.classList.remove('time-penalty'), 500);
 }
 
+function addTimeBonus(amount) {
+    timeLeft += amount;
+    timerElement.textContent = formatTime(timeLeft);
+    timerElement.classList.add('time-bonus');
+    setTimeout(() => timerElement.classList.remove('time-bonus'), 500);
+}
+
 function startTimer() {
     clearInterval(timerInterval);
-    timeLeft = 180;
+    timeLeft = levelTimeLeft;
     timerElement.textContent = formatTime(timeLeft);
     timerElement.classList.remove('timer-warning');
     isGameActive = true;
@@ -139,7 +202,6 @@ function startTimer() {
             clearInterval(timerInterval);
             isGameActive = false;
             timerElement.classList.remove('timer-warning');
-
             gameOverScoreElement.textContent = score;
             playSound('error');
             gameOverModal.classList.remove('hidden');
@@ -148,8 +210,7 @@ function startTimer() {
 }
 
 function pickRandomWords(numWords) {
-    const selectedCategory = categorySelect.value;
-    const currentCategoryWords = categories[selectedCategory];
+    const currentCategoryWords = categories[categorySelect.value];
     const shuffled = [...currentCategoryWords].sort(() => 0.5 - Math.random());
     wordsToFind = shuffled.slice(0, numWords);
 }
@@ -164,17 +225,24 @@ function initializeMatrix() {
 
 function canPlaceWord(word, row, col, dir) {
     if (dir === 'horizontal' && col + word.length > gridSize) return false;
+    if (dir === 'horizontal-rev' && col - word.length < -1) return false;
     if (dir === 'vertical' && row + word.length > gridSize) return false;
+    if (dir === 'vertical-rev' && row - word.length < -1) return false;
     if (dir === 'diagonal' && (row + word.length > gridSize || col + word.length > gridSize)) return false;
+    if (dir === 'diagonal-rev' && (row - word.length < -1 || col - word.length < -1)) return false;
     if (dir === 'diagonal-up' && (row - (word.length - 1) < 0 || col + word.length > gridSize)) return false;
+    if (dir === 'diagonal-up-rev' && (row + word.length > gridSize || col - word.length < -1)) return false;
 
     for (let i = 0; i < word.length; i++) {
-        let currentRow = row;
-        let currentCol = col;
+        let currentRow = row, currentCol = col;
+        if (dir === 'horizontal') currentCol = col + i;
+        if (dir === 'horizontal-rev') currentCol = col - i;
         if (dir === 'vertical') currentRow = row + i;
-        else if (dir === 'horizontal') currentCol = col + i;
-        else if (dir === 'diagonal') { currentRow = row + i; currentCol = col + i; }
-        else if (dir === 'diagonal-up') { currentRow = row - i; currentCol = col + i; }
+        if (dir === 'vertical-rev') currentRow = row - i;
+        if (dir === 'diagonal') { currentRow = row + i; currentCol = col + i; }
+        if (dir === 'diagonal-rev') { currentRow = row - i; currentCol = col - i; }
+        if (dir === 'diagonal-up') { currentRow = row - i; currentCol = col + i; }
+        if (dir === 'diagonal-up-rev') { currentRow = row + i; currentCol = col - i; }
 
         if (gridMatrix[currentRow][currentCol] !== '' && gridMatrix[currentRow][currentCol] !== word[i]) {
             return false;
@@ -184,12 +252,11 @@ function canPlaceWord(word, row, col, dir) {
 }
 
 function placeWord(word) {
-    const directions = ['horizontal', 'vertical', 'diagonal', 'diagonal-up'];
     let placed = false;
     let attempts = 0;
 
-    while (!placed && attempts < 200) {
-        const dir = directions[Math.floor(Math.random() * directions.length)];
+    while (!placed && attempts < 300) {
+        const dir = allowedDirections[Math.floor(Math.random() * allowedDirections.length)];
         let row = Math.floor(Math.random() * gridSize);
         let col = Math.floor(Math.random() * gridSize);
 
@@ -198,9 +265,13 @@ function placeWord(word) {
 
             for (let i = 0; i < word.length; i++) {
                 if (dir === 'horizontal') gridMatrix[row][col + i] = word[i];
-                else if (dir === 'vertical') gridMatrix[row + i][col] = word[i];
-                else if (dir === 'diagonal') gridMatrix[row + i][col + i] = word[i];
-                else if (dir === 'diagonal-up') gridMatrix[row - i][col + i] = word[i];
+                if (dir === 'horizontal-rev') gridMatrix[row][col - i] = word[i];
+                if (dir === 'vertical') gridMatrix[row + i][col] = word[i];
+                if (dir === 'vertical-rev') gridMatrix[row - i][col] = word[i];
+                if (dir === 'diagonal') gridMatrix[row + i][col + i] = word[i];
+                if (dir === 'diagonal-rev') gridMatrix[row - i][col - i] = word[i];
+                if (dir === 'diagonal-up') gridMatrix[row - i][col + i] = word[i];
+                if (dir === 'diagonal-up-rev') gridMatrix[row + i][col - i] = word[i];
             }
             placed = true;
         }
@@ -337,13 +408,18 @@ function checkSelectedWord() {
 
             foundMatch = true;
             wordFoundCount++;
-            score += 100;
+            score += (100 * currentLevel); // מקבלים יותר ניקוד ככל שהשלב גבוה
             scoreElement.textContent = score;
+
+            // בונוס זמן בשלבים מתקדמים
+            if (currentLevel >= 8) {
+                addTimeBonus(5);
+            }
 
             if (wordFoundCount === wordsToFind.length) {
                 clearInterval(timerInterval);
                 isGameActive = false;
-                const timeBonus = timeLeft * 2;
+                const timeBonus = timeLeft * currentLevel;
                 score += timeBonus;
                 scoreElement.textContent = score;
 
@@ -360,6 +436,10 @@ function checkSelectedWord() {
                     newRecordMsg.classList.add('hidden');
                 }
 
+                // שמירת ההתקדמות לשלב הבא
+                currentLevel++;
+                localStorage.setItem('bulkGameLevel', currentLevel);
+
                 setTimeout(() => {
                     victoryModal.classList.remove('hidden');
                 }, 400);
@@ -373,18 +453,16 @@ function checkSelectedWord() {
         if (selectedCells.length > 1) {
             playSound('error');
             strikes++;
-            strikesElement.textContent = `${strikes}/3`;
+            strikesElement.textContent = `${strikes}/${strikesToPenalty}`;
 
-            if (strikes >= 3) {
-                applyTimePenalty(15);
+            if (strikes >= strikesToPenalty) {
+                applyTimePenalty(currentPenaltySeconds);
                 strikes = 0;
-                strikesElement.textContent = `${strikes}/3`;
+                strikesElement.textContent = `${strikes}/${strikesToPenalty}`;
             }
         }
         document.querySelectorAll('.cell.selected').forEach(cell => {
-            if (!cell.classList.contains('found')) {
-                cell.classList.remove('selected');
-            }
+            if (!cell.classList.contains('found')) cell.classList.remove('selected');
         });
     }
     selectedCells = [];
@@ -399,7 +477,7 @@ hintBtn.addEventListener('click', () => {
     });
 
     if (unfoundWords.length > 0) {
-        applyTimePenalty(20);
+        applyTimePenalty(currentPenaltySeconds * 2);
 
         const randomWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
         const info = placedWordsInfo[randomWord];
@@ -426,16 +504,17 @@ function renderWordList() {
 }
 
 function initGame() {
+    setupLevelParameters();
+
     wordFoundCount = 0;
-    score = 0;
     strikes = 0;
-    scoreElement.textContent = score;
-    strikesElement.textContent = `${strikes}/3`;
+    scoreElement.textContent = score; // השארת הניקוד הקודם (אם משחקים ברצף)
+    strikesElement.textContent = `0/${strikesToPenalty}`;
 
     document.querySelectorAll('.cell.hinted').forEach(c => c.classList.remove('hinted'));
     timerElement.classList.remove('timer-warning');
 
-    pickRandomWords(10);
+    pickRandomWords(levelWordsCount);
     initializeMatrix();
     wordsToFind.forEach(word => placeWord(word));
     fillEmptySpacesAndRender();
@@ -449,35 +528,54 @@ function startGameFlow() {
         hasGameStarted = true;
         gameArea.classList.remove('hidden');
         hintBtn.classList.remove('hidden');
-        newGameBtn.textContent = 'משחק חדש';
+        newGameBtn.textContent = 'משחק חדש מתאפס';
+    } else {
+        // אם לחצו שוב על כפתור "משחק חדש מתאפס", הניקוד והשלב מתאפסים
+        score = 0;
     }
     initGame();
 }
 
+resetLevelBtn.addEventListener('click', () => {
+    if (confirm("האם אתה בטוח שברצונך לאפס את כל השלבים ולחזור לשלב 1?")) {
+        currentLevel = 1;
+        score = 0;
+        localStorage.setItem('bulkGameLevel', 1);
+        if (hasGameStarted) initGame();
+    }
+});
+
 function shareScoreToWhatsApp() {
-    const text = encodeURIComponent(`שיחקתי תפזורת והשגתי ${score} נקודות! 🏆 מי יכול לעקוף אותי?`);
+    const text = encodeURIComponent(`הגעתי לשלב ${currentLevel - 1} בתפזורת והשגתי ${score} נקודות! 🏆 מי יכול לעקוף אותי?`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 
 updateBackground();
 
-newGameBtn.addEventListener('click', startGameFlow);
+newGameBtn.addEventListener('click', () => {
+    score = 0; // איפוס ניקוד כשמתחילים משחק יזום (לא רציף)
+    startGameFlow();
+});
 
 categorySelect.addEventListener('change', () => {
     updateBackground();
     if (hasGameStarted) {
+        score = 0; // החלפת קטגוריה מאפסת את רצף הניקוד
         initGame();
     }
 });
 
 playAgainBtn.addEventListener('click', () => {
     victoryModal.classList.add('hidden');
-    startGameFlow();
+    // עוברים לשלב הבא עם הניקוד שנצבר
+    initGame();
 });
 
 gameOverPlayAgainBtn.addEventListener('click', () => {
     gameOverModal.classList.add('hidden');
-    startGameFlow();
+    // אם נפסלו, הניקוד מתאפס אבל נשארים באותו שלב לנסות שוב
+    score = 0;
+    initGame();
 });
 
 if (shareWaVictory) shareWaVictory.addEventListener('click', shareScoreToWhatsApp);

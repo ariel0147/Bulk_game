@@ -37,7 +37,7 @@ body {
 }
 
 .stat-box {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     color: #00FFAA;
     background: rgba(0, 0, 0, 0.6);
@@ -147,7 +147,6 @@ body {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(12, 32px);
     gap: 5px;
     margin: 15px auto;
     justify-content: center;
@@ -155,19 +154,18 @@ body {
 }
 
 .cell {
-    width: 32px;
-    height: 32px;
     background: rgba(255, 255, 255, 0.08);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 18px;
+    font-size: clamp(14px, 2vw, 20px);
     font-weight: bold;
     cursor: pointer;
     border-radius: 6px;
     user-select: none;
     transition: all 0.15s ease;
     border: 1px solid transparent;
+    aspect-ratio: 1/1;
 }
 
 .cell:hover {
@@ -201,7 +199,7 @@ body {
 }
 
 .word-item {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     padding: 6px 14px;
     background: rgba(255, 255, 255, 0.1);
@@ -214,8 +212,7 @@ body {
     display: none !important;
 }
 
-/* --- אנימציות ושדרוגים --- */
-
+/* --- אנימציות --- */
 @keyframes popUp {
     0% { transform: scale(1); }
     50% { transform: scale(1.15); }
@@ -228,8 +225,18 @@ body {
     100% { background-color: rgba(0, 0, 0, 0.6); color: white; }
 }
 
+@keyframes addTimeGreen {
+    0% { color: white; }
+    50% { color: #00FFAA; transform: scale(1.2); text-shadow: 0 0 10px #00FFAA; }
+    100% { color: white; }
+}
+
 .time-penalty {
     animation: flashRed 0.5s ease-out;
+}
+
+.time-bonus {
+    animation: addTimeGreen 0.5s ease-out;
 }
 
 .cell.found {
@@ -248,7 +255,6 @@ body {
     animation: popUp 0.4s ease-out;
 }
 
-/* --- מודלים של ניצחון וסיום הזמן --- */
 .modal {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -274,7 +280,6 @@ body {
 .modal-content h2 { color: #FF0055; text-shadow: 0 0 10px #FF0055; margin-top: 0; }
 #new-record-msg { color: #FFD700; font-weight: bold; font-size: 22px; text-shadow: 0 0 15px #FFD700; animation: popUp 1s infinite alternate; }
 
-/* --- אנימציה ל-10 שניות אחרונות --- */
 @keyframes timerPulse {
     0% { transform: scale(1); color: #FF0055; text-shadow: 0 0 10px #FF0055; }
     50% { transform: scale(1.2); color: white; text-shadow: 0 0 20px #FF0055; }
@@ -286,12 +291,11 @@ body {
     display: inline-block;
 }
 
-/* --- התאמה חכמה למובייל עם שוליים מקצועיים --- */
 @media (max-width: 600px) {
     .game-container {
-        padding: 15px;      /* הוחזר הריווח הפנימי */
-        width: 92vw;        /* מונע היצמדות מוחלטת לקצוות */
-        margin: 15px auto;  /* שומר על רווח מלמעלה ומלמטה ומרכז את הכרטיס */
+        padding: 15px;
+        width: 92vw;
+        margin: 15px auto;
         box-sizing: border-box;
     }
     .stats-container {
@@ -300,20 +304,17 @@ body {
         align-items: center;
         justify-content: center;
     }
-    .stat-box { font-size: 14px; padding: 6px 10px; }
+    .stat-box { font-size: 12px; padding: 6px 10px; }
 
     .grid {
-        grid-template-columns: repeat(12, 1fr);
         gap: 2px;
         width: 100%;
-        max-width: 380px; /* מונע מהלוח לגדול מעבר לפרופורציה במסכים מעט רחבים יותר */
+        max-width: 380px;
         margin: 0 auto;
     }
     .cell {
         width: 100%;
         height: auto;
-        aspect-ratio: 1 / 1;
-        font-size: 16px; /* מותאם כדי שהאותיות ייכנסו בדיוק בתא למרות המרווחים שהוספנו */
         border-radius: 4px;
     }
 }

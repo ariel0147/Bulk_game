@@ -26,11 +26,13 @@
             <option value="animals">עולם החי</option>
         </select>
         <button id="new-game-btn" class="neon-btn">התחל משחק</button>
-        <button id="hint-btn" class="neon-btn hint-btn hidden">💡 רמז (-20 ש')</button>
+        <button id="hint-btn" class="neon-btn hint-btn hidden">💡 רמז</button>
+        <button id="reset-level-btn" class="neon-btn" style="border-color: #aaa; color: #aaa; font-size: 12px; padding: 5px 10px;">🔄 איפוס שלבים</button>
     </div>
 
     <div id="game-area" class="hidden">
         <div class="stats-container">
+            <div class="stat-box" style="color:#FF8C00; border-color:#FF8C00; box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);">שלב: <span id="level-display">1</span></div>
             <div class="stat-box">זמן: <span id="timer">03:00</span></div>
             <div class="stat-box strikes-box">פסילות: <span id="strikes">0/3</span></div>
             <div class="stat-box">ניקוד: <span id="score">0</span></div>
@@ -44,12 +46,12 @@
 
 <div id="victory-modal" class="modal hidden">
     <div class="modal-content">
-        <h2>🏆 כול הכבוד! 🏆</h2>
-        <p>סיימת את כל המילים!</p>
-        <p>ניקוד סופי: <span id="final-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
+        <h2>🏆 כל הכבוד! 🏆</h2>
+        <p>סיימת את השלב בהצלחה!</p>
+        <p>ניקוד מצטבר: <span id="final-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
         <p id="new-record-msg" class="hidden">🎉 שיא חדש! 🎉</p>
         <div class="modal-buttons">
-            <button id="play-again-btn" class="neon-btn">שחק שוב</button>
+            <button id="play-again-btn" class="neon-btn">המשך לשלב הבא ➔</button>
             <button id="share-wa-victory" class="neon-btn wa-btn">שתף בוואטסאפ 🟢</button>
         </div>
     </div>
@@ -61,7 +63,7 @@
         <p>הזמן עבר והמשחק הסתיים.</p>
         <p>ניקוד סופי: <span id="game-over-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
         <div class="modal-buttons">
-            <button id="game-over-play-again-btn" class="neon-btn" style="border-color: #FF0055; color: #FF0055; box-shadow: 0 0 15px rgba(255,0,85,0.3);">שחק שוב</button>
+            <button id="game-over-play-again-btn" class="neon-btn" style="border-color: #FF0055; color: #FF0055; box-shadow: 0 0 15px rgba(255,0,85,0.3);">נסה את השלב שוב</button>
             <button id="share-wa-gameover" class="neon-btn wa-btn">שתף תוצאה בוואטסאפ 🟢</button>
         </div>
     </div>
