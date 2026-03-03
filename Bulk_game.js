@@ -1,19 +1,31 @@
 const categories = {
-    programming: ['מחשב', 'אינטרנט', 'תכנות', 'פיתוח', 'שרת', 'קוד', 'תוכנה', 'רשת', 'מקלדת', 'עכבר', 'אפליקציה', 'משחק', 'ריאקט', 'נוד', 'סישארפ', 'אבטחה', 'אלגוריתם', 'דאטה'],
-    anime: ['איצגו', 'רוקיה', 'בנקאי', 'הולו', 'שיניגאמי', 'נארוטו', 'סאסקה', 'לופי', 'זורו', 'אנימציה', 'מנגה', 'טוקיו', 'גוקו', 'סליים', 'פנטזיה', 'קוספליי'],
-    cars: ['מנוע', 'הילוכים', 'בלמים', 'הגה', 'כביש', 'יונדאי', 'ולוסטר', 'אגזוז', 'מפתח', 'גלגל', 'צמיג', 'מהירות', 'דלק', 'שמן', 'טורבו', 'מצבר', 'מוסך'],
-    gaming: ['קונסולה', 'שלט', 'מקלדת', 'עכבר', 'פינג', 'לאג', 'סנייפר', 'בוס', 'לוט', 'סקין', 'קווסט', 'שחקן', 'מולטיפלייר', 'ראנק'],
+    programming: ['מחשב', 'אינטרנט', 'תכנות', 'פיתוח', 'שרת', 'קוד', 'תוכנה', 'ריאקט', 'נוד', 'סישארפ', 'פיאייצפי', 'אקספרס', 'אבטחה', 'דאטה'],
+    anime: ['איצגו', 'רוקיה', 'בנקאי', 'הולו', 'שיניגאמי', 'נארוטו', 'סאסקה', 'לופי', 'זורו', 'אנימציה', 'מנגה', 'טוקיו', 'גוקו', 'קוספליי'],
+    cars: ['מנוע', 'הילוכים', 'בלמים', 'הגה', 'כביש', 'יונדאי', 'ולוסטר', 'אגזוז', 'מפתח', 'כיסוי', 'גלגל', 'צמיג', 'מהירות', 'דלק', 'מצבר', 'מוסך'],
+    mobile_games: ['סליים', 'טירה', 'שדרוג', 'מובייל', 'קונסולה', 'שלט', 'סנייפר', 'בוס', 'לוט', 'סקין', 'קווסט', 'שחקן', 'ראנק'],
     food: ['פיצה', 'המבורגר', 'פסטה', 'סלט', 'שוקולד', 'גלידה', 'סושי', 'סטייק', 'ציפס', 'עוגה', 'לחם', 'גבינה', 'בשר', 'פירות'],
-    animals: ['כלב', 'חתול', 'אריה', 'נמר', 'פיל', 'קוף', 'גירפה', 'זאב', 'דוב', 'נשר', 'דולפין', 'לוויתן', 'כריש', 'תוכי', 'נחש']
+    animals: ['כלב', 'חתול', 'אריה', 'נמר', 'פיל', 'קוף', 'גירפה', 'זאב', 'דוב', 'נשר', 'דולפין', 'לוויתן', 'כריש', 'תוכי', 'נחש'],
+    tools: ['פטיש', 'מברג', 'מסור', 'פלייר', 'מקדחה', 'מפתח', 'בורג', 'מסמר', 'פלס', 'מלחציים', 'איזמל', 'דיסק'],
+    countries: ['ישראל', 'ארהב', 'קנדה', 'ברזיל', 'אנגליה', 'צרפת', 'ספרד', 'איטליה', 'יפן', 'סין', 'הודו', 'אוסטרליה', 'פולין', 'יוון'],
+    medicine: ['רופא', 'אחות', 'מזרק', 'תרופה', 'חום', 'דם', 'וירוס', 'חיסון', 'פצע', 'תחבושת', 'מרפאה', 'ניתוח', 'כדור', 'משחה'],
+    names: ['דוד', 'משה', 'אברהם', 'יצחק', 'יעקב', 'רחל', 'שרה', 'רבקה', 'לאה', 'אריאל', 'נועה', 'מאיה', 'יוסף', 'תמר'],
+    languages: ['עברית', 'אנגלית', 'ערבית', 'ספרדית', 'צרפתית', 'רוסית', 'סינית', 'יפנית', 'איטלקית', 'גרמנית', 'יוונית'],
+    fashion: ['חולצה', 'מכנס', 'שמלה', 'חצאית', 'נעליים', 'כובע', 'צעיף', 'מעיל', 'גרביים', 'חגורה', 'שרשרת', 'טבעת', 'תיק']
 };
 
 const backgrounds = {
     programming: 'url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop")',
     anime: 'url("anime.jpg")',
     cars: 'url("https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2000&auto=format&fit=crop")',
-    gaming: 'url("https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2000&auto=format&fit=crop")',
+    mobile_games: 'url("https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2000&auto=format&fit=crop")',
     food: 'url("https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2000&auto=format&fit=crop")',
-    animals: 'url("https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2000&auto=format&fit=crop")'
+    animals: 'url("https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2000&auto=format&fit=crop")',
+    tools: 'url("https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=2000&auto=format&fit=crop")',
+    countries: 'url("https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=2000&auto=format&fit=crop")',
+    medicine: 'url("https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2000&auto=format&fit=crop")',
+    names: 'url("https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2000&auto=format&fit=crop")',
+    languages: 'url("https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=2000&auto=format&fit=crop")',
+    fashion: 'url("https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2000&auto=format&fit=crop")'
 };
 
 let currentLevel = parseInt(localStorage.getItem('bulkGameLevel')) || 1;
@@ -151,7 +163,7 @@ function setupLevelParameters() {
     if (levelWordsCount > maxCategoryWords) levelWordsCount = maxCategoryWords;
 
     levelDisplayElement.textContent = currentLevel;
-    hintBtn.textContent = `💡 רמז (-${currentPenaltySeconds * 2} ש')`;
+    hintBtn.textContent = `💡 רמז (-15 ש')`;
     updateGridCSS();
 }
 
@@ -202,7 +214,6 @@ function startTimer() {
             isGameActive = false;
             timerElement.classList.remove('timer-warning');
 
-            // עדכון השלב במודל הפסד
             gameOverLevelElement.textContent = currentLevel;
             gameOverScoreElement.textContent = score;
 
@@ -264,7 +275,8 @@ function placeWord(word) {
         let col = Math.floor(Math.random() * gridSize);
 
         if (canPlaceWord(word, row, col, dir)) {
-            placedWordsInfo[word] = { startRow: row, startCol: col };
+            // הוספנו את שמירת הכיוון (direction) עבור מנגנון הרמזים החדש
+            placedWordsInfo[word] = { startRow: row, startCol: col, direction: dir };
 
             for (let i = 0; i < word.length; i++) {
                 if (dir === 'horizontal') gridMatrix[row][col + i] = word[i];
@@ -428,7 +440,6 @@ function checkSelectedWord() {
                 playSound('win');
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
-                // עדכון השלב במודל לפני שמעלים אותו
                 victoryLevelElement.textContent = currentLevel;
 
                 finalScoreElement.textContent = score;
@@ -472,6 +483,7 @@ function checkSelectedWord() {
     selectedCells = [];
 }
 
+// מערכת הרמזים המשודרגת שחושפת את כל הנתיב של המילה
 hintBtn.addEventListener('click', () => {
     if (!isGameActive) return;
 
@@ -481,17 +493,42 @@ hintBtn.addEventListener('click', () => {
     });
 
     if (unfoundWords.length > 0) {
-        applyTimePenalty(currentPenaltySeconds * 2);
+        // קנס זמן על רמז שמגלה את כל המילה
+        applyTimePenalty(15);
 
         const randomWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
         const info = placedWordsInfo[randomWord];
 
         if (info) {
-            const cell = document.querySelector(`.cell[data-row="${info.startRow}"][data-col="${info.startCol}"]`);
-            if (cell && !cell.classList.contains('found')) {
-                cell.classList.add('hinted');
-                playSound('tick');
+            const cellsToHint = [];
+            // איסוף כל התאים שמרכיבים את המילה לפי הכיוון שלה
+            for (let i = 0; i < randomWord.length; i++) {
+                let r = info.startRow;
+                let c = info.startCol;
+
+                if (info.direction === 'horizontal') c += i;
+                if (info.direction === 'horizontal-rev') c -= i;
+                if (info.direction === 'vertical') r += i;
+                if (info.direction === 'vertical-rev') r -= i;
+                if (info.direction === 'diagonal') { r += i; c += i; }
+                if (info.direction === 'diagonal-rev') { r -= i; c -= i; }
+                if (info.direction === 'diagonal-up') { r -= i; c += i; }
+                if (info.direction === 'diagonal-up-rev') { r += i; c -= i; }
+
+                const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+                if (cell && !cell.classList.contains('found')) {
+                    cellsToHint.push(cell);
+                }
             }
+
+            // הפעלת ההבהוב על כל תאי המילה ביחד
+            cellsToHint.forEach(cell => cell.classList.add('hinted'));
+            playSound('tick');
+
+            // הסרת ההבהוב אחרי שניה וחצי
+            setTimeout(() => {
+                cellsToHint.forEach(cell => cell.classList.remove('hinted'));
+            }, 1500);
         }
     }
 });
@@ -539,7 +576,6 @@ function startGameFlow() {
     initGame();
 }
 
-// לוגיקת המודל של איפוס שלבים
 resetLevelBtn.addEventListener('click', () => {
     resetModal.classList.remove('hidden');
 });
