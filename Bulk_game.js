@@ -1,4 +1,3 @@
-// המילים החדשות והמורחבות
 const categories = {
     programming: ['מחשב', 'אינטרנט', 'תכנות', 'פיתוח', 'שרת', 'קוד', 'תוכנה', 'רשת', 'מקלדת', 'עכבר', 'אפליקציה', 'משחק', 'ריאקט', 'נוד', 'סישארפ', 'אבטחה', 'אלגוריתם', 'דאטה'],
     anime: ['איצגו', 'רוקיה', 'בנקאי', 'הולו', 'שיניגאמי', 'נארוטו', 'סאסקה', 'לופי', 'זורו', 'אנימציה', 'מנגה', 'טוקיו', 'גוקו', 'סליים', 'פנטזיה', 'קוספליי'],
@@ -18,7 +17,7 @@ const backgrounds = {
 };
 
 let wordsToFind = [];
-let placedWordsInfo = {}; // ישמור את המיקום של האות הראשונה של כל מילה
+let placedWordsInfo = {};
 
 const gridSize = 12;
 const gridElement = document.getElementById('grid');
@@ -37,10 +36,12 @@ const finalScoreElement = document.getElementById('final-score');
 const playAgainBtn = document.getElementById('play-again-btn');
 const newRecordMsg = document.getElementById('new-record-msg');
 
-// משתנים למודל נגמר הזמן החדש
 const gameOverModal = document.getElementById('game-over-modal');
 const gameOverScoreElement = document.getElementById('game-over-score');
 const gameOverPlayAgainBtn = document.getElementById('game-over-play-again-btn');
+
+const shareWaVictory = document.getElementById('share-wa-victory');
+const shareWaGameOver = document.getElementById('share-wa-gameover');
 
 let currentHighScore = localStorage.getItem('bulkGameHighScore') || 0;
 if (highScoreElement) highScoreElement.textContent = currentHighScore;
@@ -58,7 +59,6 @@ let timerInterval = null;
 let isGameActive = false;
 let hasGameStarted = false;
 
-// --- מערכת סאונד ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
 const soundSettings = {
@@ -121,19 +121,18 @@ function applyTimePenalty(amount) {
 
 function startTimer() {
     clearInterval(timerInterval);
-    timeLeft = 180; // 3 דקות
+    timeLeft = 180;
     timerElement.textContent = formatTime(timeLeft);
-    timerElement.classList.remove('timer-warning'); // איפוס אנימציה
+    timerElement.classList.remove('timer-warning');
     isGameActive = true;
 
     timerInterval = setInterval(() => {
         if (timeLeft > 0) timeLeft--;
         timerElement.textContent = formatTime(timeLeft);
 
-        // הוספת הבהוב ב-10 שניות האחרונות
         if (timeLeft <= 10 && timeLeft > 0) {
             timerElement.classList.add('timer-warning');
-            playSound('tick'); // תקתוק מלחיץ כשנגמר הזמן
+            playSound('tick');
         }
 
         if (timeLeft <= 0) {
@@ -141,9 +140,8 @@ function startTimer() {
             isGameActive = false;
             timerElement.classList.remove('timer-warning');
 
-            // הצגת המודל המעוצב במקום ה-alert הישן
             gameOverScoreElement.textContent = score;
-            playSound('error'); // סאונד סיום צורם/הפסד
+            playSound('error');
             gameOverModal.classList.remove('hidden');
         }
     }, 1000);
@@ -434,7 +432,6 @@ function initGame() {
     scoreElement.textContent = score;
     strikesElement.textContent = `${strikes}/3`;
 
-    // ניקוי רמזים אם היו ממשחק קודם ואיפוס צבע טיימר
     document.querySelectorAll('.cell.hinted').forEach(c => c.classList.remove('hinted'));
     timerElement.classList.remove('timer-warning');
 
@@ -457,6 +454,11 @@ function startGameFlow() {
     initGame();
 }
 
+function shareScoreToWhatsApp() {
+    const text = encodeURIComponent(`שיחקתי תפזורת והשגתי ${score} נקודות! 🏆 מי יכול לעקוף אותי?`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+}
+
 updateBackground();
 
 newGameBtn.addEventListener('click', startGameFlow);
@@ -473,11 +475,13 @@ playAgainBtn.addEventListener('click', () => {
     startGameFlow();
 });
 
-// כפתור לשחק שוב במודל ההפסד (החדש)
 gameOverPlayAgainBtn.addEventListener('click', () => {
     gameOverModal.classList.add('hidden');
     startGameFlow();
 });
+
+if (shareWaVictory) shareWaVictory.addEventListener('click', shareScoreToWhatsApp);
+if (shareWaGameOver) shareWaGameOver.addEventListener('click', shareScoreToWhatsApp);
 
 document.addEventListener('mouseup', handleMouseUp);
 gridElement.addEventListener('touchmove', handleTouchMove, { passive: false });

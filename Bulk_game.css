@@ -124,6 +124,27 @@ body {
     box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
+/* עיצוב כפתור וואטסאפ */
+.wa-btn {
+    border-color: #25D366;
+    color: #25D366;
+    box-shadow: 0 0 15px rgba(37, 211, 102, 0.3), inset 0 0 10px rgba(37, 211, 102, 0.2);
+}
+
+.wa-btn:hover {
+    background: #25D366;
+    color: #000;
+    box-shadow: 0 0 30px rgba(37, 211, 102, 0.8), inset 0 0 20px rgba(37, 211, 102, 0.6);
+}
+
+.modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    margin-top: 25px;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(12, 32px);
@@ -227,7 +248,7 @@ body {
     animation: popUp 0.4s ease-out;
 }
 
-/* --- מודל הניצחון (ומודל סיום הזמן) --- */
+/* --- מודלים של ניצחון וסיום הזמן --- */
 .modal {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -241,7 +262,7 @@ body {
 
 .modal-content {
     background: rgba(15, 15, 20, 0.95);
-    padding: 40px;
+    padding: 30px;
     border-radius: 20px;
     border: 2px solid #00FFAA;
     box-shadow: 0 0 30px rgba(0, 255, 170, 0.4);
@@ -265,9 +286,14 @@ body {
     display: inline-block;
 }
 
-/* --- התאמה חכמה לטלפונים ניידים --- */
+/* --- התאמה חכמה למובייל עם שוליים מקצועיים --- */
 @media (max-width: 600px) {
-    .game-container { padding: 8px; width: 98vw; }
+    .game-container {
+        padding: 15px;      /* הוחזר הריווח הפנימי */
+        width: 92vw;        /* מונע היצמדות מוחלטת לקצוות */
+        margin: 15px auto;  /* שומר על רווח מלמעלה ומלמטה ומרכז את הכרטיס */
+        box-sizing: border-box;
+    }
     .stats-container {
         flex-direction: row;
         gap: 8px;
@@ -277,15 +303,17 @@ body {
     .stat-box { font-size: 14px; padding: 6px 10px; }
 
     .grid {
-        grid-template-columns: repeat(12, 1fr); /* מאפשר לתאים לתפוס את כל הרוחב באופן שווה */
-        gap: 3px;
-        width: 100%; /* מנצל את כל רוחב המסך */
+        grid-template-columns: repeat(12, 1fr);
+        gap: 2px;
+        width: 100%;
+        max-width: 380px; /* מונע מהלוח לגדול מעבר לפרופורציה במסכים מעט רחבים יותר */
+        margin: 0 auto;
     }
     .cell {
-        width: 100%; /* רוחב דינמי */
+        width: 100%;
         height: auto;
-        aspect-ratio: 1 / 1; /* שומר שהתא תמיד יהיה ריבוע מושלם */
-        font-size: 18px; /* הגדלנו משמעותית את האותיות במובייל! */
+        aspect-ratio: 1 / 1;
+        font-size: 16px; /* מותאם כדי שהאותיות ייכנסו בדיוק בתא למרות המרווחים שהוספנו */
         border-radius: 4px;
     }
 }
