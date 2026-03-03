@@ -53,6 +53,16 @@
     </div>
 </div>
 
+<div id="game-over-modal" class="modal hidden">
+    <div class="modal-content" style="border-color: #FF0055; box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);">
+        <h2 style="color: #FF0055; text-shadow: 0 0 10px #FF0055;">⏳ נגמר הזמן! ⏳</h2>
+        <p>הזמן עבר והמשחק הסתיים.</p>
+        <p>ניקוד סופי: <span id="game-over-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
+        <br>
+        <button id="game-over-play-again-btn" class="neon-btn" style="border-color: #FF0055; color: #FF0055; box-shadow: 0 0 15px rgba(255,0,85,0.3);">שחק שוב</button>
+    </div>
+</div>
+
 <script src="Bulk_game.js"></script>
 <script>
     // רישום ה-Service Worker עבור ה-PWA

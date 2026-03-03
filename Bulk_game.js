@@ -37,6 +37,11 @@ const finalScoreElement = document.getElementById('final-score');
 const playAgainBtn = document.getElementById('play-again-btn');
 const newRecordMsg = document.getElementById('new-record-msg');
 
+// משתנים למודל נגמר הזמן החדש
+const gameOverModal = document.getElementById('game-over-modal');
+const gameOverScoreElement = document.getElementById('game-over-score');
+const gameOverPlayAgainBtn = document.getElementById('game-over-play-again-btn');
+
 let currentHighScore = localStorage.getItem('bulkGameHighScore') || 0;
 if (highScoreElement) highScoreElement.textContent = currentHighScore;
 
@@ -116,18 +121,30 @@ function applyTimePenalty(amount) {
 
 function startTimer() {
     clearInterval(timerInterval);
-    timeLeft = 180;
+    timeLeft = 180; // 3 דקות
     timerElement.textContent = formatTime(timeLeft);
+    timerElement.classList.remove('timer-warning'); // איפוס אנימציה
     isGameActive = true;
 
     timerInterval = setInterval(() => {
         if (timeLeft > 0) timeLeft--;
         timerElement.textContent = formatTime(timeLeft);
 
+        // הוספת הבהוב ב-10 שניות האחרונות
+        if (timeLeft <= 10 && timeLeft > 0) {
+            timerElement.classList.add('timer-warning');
+            playSound('tick'); // תקתוק מלחיץ כשנגמר הזמן
+        }
+
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             isGameActive = false;
-            setTimeout(() => alert(`נגמר הזמן! ⏳ הניקוד הסופי שלך הוא: ${score}`), 100);
+            timerElement.classList.remove('timer-warning');
+
+            // הצגת המודל המעוצב במקום ה-alert הישן
+            gameOverScoreElement.textContent = score;
+            playSound('error'); // סאונד סיום צורם/הפסד
+            gameOverModal.classList.remove('hidden');
         }
     }, 1000);
 }
@@ -179,7 +196,6 @@ function placeWord(word) {
         let col = Math.floor(Math.random() * gridSize);
 
         if (canPlaceWord(word, row, col, dir)) {
-            // שמירת המיקום בשביל הרמז
             placedWordsInfo[word] = { startRow: row, startCol: col };
 
             for (let i = 0; i < word.length; i++) {
@@ -356,13 +372,13 @@ function checkSelectedWord() {
     }
 
     if (!foundMatch) {
-        if (selectedCells.length > 1) { // רק אם באמת גררו שגיאה
+        if (selectedCells.length > 1) {
             playSound('error');
             strikes++;
             strikesElement.textContent = `${strikes}/3`;
 
             if (strikes >= 3) {
-                applyTimePenalty(15); // עונש של 15 שניות על 3 פסילות
+                applyTimePenalty(15);
                 strikes = 0;
                 strikesElement.textContent = `${strikes}/3`;
             }
@@ -376,20 +392,17 @@ function checkSelectedWord() {
     selectedCells = [];
 }
 
-// פונקציית רמזים
 hintBtn.addEventListener('click', () => {
     if (!isGameActive) return;
 
-    // מציאת המילים שעוד לא נמצאו
     const unfoundWords = wordsToFind.filter(word => {
         const wordEl = document.getElementById(`word-${word}`);
         return wordEl && !wordEl.classList.contains('found');
     });
 
     if (unfoundWords.length > 0) {
-        applyTimePenalty(20); // הורדת 20 שניות
+        applyTimePenalty(20);
 
-        // בחירת מילה אחת באקראי מהמילים שנשארו
         const randomWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
         const info = placedWordsInfo[randomWord];
 
@@ -421,8 +434,9 @@ function initGame() {
     scoreElement.textContent = score;
     strikesElement.textContent = `${strikes}/3`;
 
-    // ניקוי רמזים אם היו ממשחק קודם
+    // ניקוי רמזים אם היו ממשחק קודם ואיפוס צבע טיימר
     document.querySelectorAll('.cell.hinted').forEach(c => c.classList.remove('hinted'));
+    timerElement.classList.remove('timer-warning');
 
     pickRandomWords(10);
     initializeMatrix();
@@ -456,6 +470,12 @@ categorySelect.addEventListener('change', () => {
 
 playAgainBtn.addEventListener('click', () => {
     victoryModal.classList.add('hidden');
+    startGameFlow();
+});
+
+// כפתור לשחק שוב במודל ההפסד (החדש)
+gameOverPlayAgainBtn.addEventListener('click', () => {
+    gameOverModal.classList.add('hidden');
     startGameFlow();
 });
 

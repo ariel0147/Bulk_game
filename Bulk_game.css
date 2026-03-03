@@ -227,7 +227,7 @@ body {
     animation: popUp 0.4s ease-out;
 }
 
-/* --- מודל הניצחון --- */
+/* --- מודל הניצחון (ומודל סיום הזמן) --- */
 .modal {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -253,23 +253,39 @@ body {
 .modal-content h2 { color: #FF0055; text-shadow: 0 0 10px #FF0055; margin-top: 0; }
 #new-record-msg { color: #FFD700; font-weight: bold; font-size: 22px; text-shadow: 0 0 15px #FFD700; animation: popUp 1s infinite alternate; }
 
+/* --- אנימציה ל-10 שניות אחרונות --- */
+@keyframes timerPulse {
+    0% { transform: scale(1); color: #FF0055; text-shadow: 0 0 10px #FF0055; }
+    50% { transform: scale(1.2); color: white; text-shadow: 0 0 20px #FF0055; }
+    100% { transform: scale(1); color: #FF0055; text-shadow: 0 0 10px #FF0055; }
+}
+
+.timer-warning {
+    animation: timerPulse 1s infinite;
+    display: inline-block;
+}
+
 /* --- התאמה חכמה לטלפונים ניידים --- */
 @media (max-width: 600px) {
-    .game-container { padding: 10px; width: 95vw; }
+    .game-container { padding: 8px; width: 98vw; }
     .stats-container {
         flex-direction: row;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
         justify-content: center;
     }
     .stat-box { font-size: 14px; padding: 6px 10px; }
+
     .grid {
-        grid-template-columns: repeat(12, minmax(22px, 7.5vw));
-        gap: 2px;
+        grid-template-columns: repeat(12, 1fr); /* מאפשר לתאים לתפוס את כל הרוחב באופן שווה */
+        gap: 3px;
+        width: 100%; /* מנצל את כל רוחב המסך */
     }
     .cell {
-        width: 7.5vw;
-        height: 7.5vw;
-        font-size: 14px;
+        width: 100%; /* רוחב דינמי */
+        height: auto;
+        aspect-ratio: 1 / 1; /* שומר שהתא תמיד יהיה ריבוע מושלם */
+        font-size: 18px; /* הגדלנו משמעותית את האותיות במובייל! */
+        border-radius: 4px;
     }
 }
