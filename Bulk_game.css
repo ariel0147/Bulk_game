@@ -124,7 +124,6 @@ body {
     box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
-/* עיצוב כפתור וואטסאפ */
 .wa-btn {
     border-color: #25D366;
     color: #25D366;
@@ -143,6 +142,12 @@ body {
     gap: 12px;
     align-items: center;
     margin-top: 25px;
+}
+
+.row-buttons {
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
 }
 
 .grid {
@@ -316,5 +321,12 @@ body {
         width: 100%;
         height: auto;
         border-radius: 4px;
+    }
+
+    /* הוספת המרווח בטלפון בין לוח האותיות למילים */
+    .word-list {
+        margin-top: 25px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1); /* קו עדין להפרדה */
     }
 }

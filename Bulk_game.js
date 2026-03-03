@@ -16,7 +16,6 @@ const backgrounds = {
     animals: 'url("https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2000&auto=format&fit=crop")'
 };
 
-// --- משתני השלבים והמשחק ---
 let currentLevel = parseInt(localStorage.getItem('bulkGameLevel')) || 1;
 let gridSize = 10;
 let levelWordsCount = 4;
@@ -45,10 +44,16 @@ const victoryModal = document.getElementById('victory-modal');
 const finalScoreElement = document.getElementById('final-score');
 const playAgainBtn = document.getElementById('play-again-btn');
 const newRecordMsg = document.getElementById('new-record-msg');
+const victoryLevelElement = document.getElementById('victory-level');
 
 const gameOverModal = document.getElementById('game-over-modal');
 const gameOverScoreElement = document.getElementById('game-over-score');
 const gameOverPlayAgainBtn = document.getElementById('game-over-play-again-btn');
+const gameOverLevelElement = document.getElementById('game-over-level');
+
+const resetModal = document.getElementById('reset-modal');
+const confirmResetBtn = document.getElementById('confirm-reset-btn');
+const cancelResetBtn = document.getElementById('cancel-reset-btn');
 
 const shareWaVictory = document.getElementById('share-wa-victory');
 const shareWaGameOver = document.getElementById('share-wa-gameover');
@@ -63,13 +68,12 @@ let wordFoundCount = 0;
 let startCell = null;
 
 let timeLeft = 180;
-let score = 0; // הניקוד נצבר בין השלבים עד שיוצאים
+let score = 0;
 let strikes = 0;
 let timerInterval = null;
 let isGameActive = false;
 let hasGameStarted = false;
 
-// --- סאונדים ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
 const soundSettings = {
@@ -119,35 +123,30 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-// --- לוגיקת השלבים ---
 function setupLevelParameters() {
     if (currentLevel <= 3) {
-        // רמת מתחילים
         gridSize = 10;
-        levelWordsCount = 4 + (currentLevel - 1); // שלב 1: 4, שלב 2: 5, שלב 3: 6
+        levelWordsCount = 4 + (currentLevel - 1);
         levelTimeLeft = 180;
         allowedDirections = ['horizontal', 'vertical'];
         strikesToPenalty = 3;
         currentPenaltySeconds = 5;
     } else if (currentLevel <= 7) {
-        // רמה בינונית
         gridSize = 12;
-        levelWordsCount = 7 + (currentLevel - 4); // מגיע עד 10 מילים
-        levelTimeLeft = Math.max(105, 150 - ((currentLevel - 4) * 15)); // יורד עד 105 שניות
+        levelWordsCount = 7 + (currentLevel - 4);
+        levelTimeLeft = Math.max(105, 150 - ((currentLevel - 4) * 15));
         allowedDirections = ['horizontal', 'vertical', 'diagonal', 'diagonal-up'];
         strikesToPenalty = 3;
         currentPenaltySeconds = 10;
     } else {
-        // רמה מתקדמת
         gridSize = 14;
         levelWordsCount = 12 + (currentLevel - 8);
-        levelTimeLeft = 90; // זמן קצר מאוד, אבל מקבלים תוספת של 5 שניות למילה
+        levelTimeLeft = 90;
         allowedDirections = ['horizontal', 'vertical', 'diagonal', 'diagonal-up', 'horizontal-rev', 'vertical-rev', 'diagonal-rev', 'diagonal-up-rev'];
-        strikesToPenalty = 1; // העונש מיידי!
+        strikesToPenalty = 1;
         currentPenaltySeconds = 5;
     }
 
-    // הגבלת המילים לכמות המקסימלית שיש בקטגוריה
     const maxCategoryWords = categories[categorySelect.value].length;
     if (levelWordsCount > maxCategoryWords) levelWordsCount = maxCategoryWords;
 
@@ -202,7 +201,11 @@ function startTimer() {
             clearInterval(timerInterval);
             isGameActive = false;
             timerElement.classList.remove('timer-warning');
+
+            // עדכון השלב במודל הפסד
+            gameOverLevelElement.textContent = currentLevel;
             gameOverScoreElement.textContent = score;
+
             playSound('error');
             gameOverModal.classList.remove('hidden');
         }
@@ -408,10 +411,9 @@ function checkSelectedWord() {
 
             foundMatch = true;
             wordFoundCount++;
-            score += (100 * currentLevel); // מקבלים יותר ניקוד ככל שהשלב גבוה
+            score += (100 * currentLevel);
             scoreElement.textContent = score;
 
-            // בונוס זמן בשלבים מתקדמים
             if (currentLevel >= 8) {
                 addTimeBonus(5);
             }
@@ -426,6 +428,9 @@ function checkSelectedWord() {
                 playSound('win');
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
+                // עדכון השלב במודל לפני שמעלים אותו
+                victoryLevelElement.textContent = currentLevel;
+
                 finalScoreElement.textContent = score;
                 if (score > currentHighScore) {
                     currentHighScore = score;
@@ -436,7 +441,6 @@ function checkSelectedWord() {
                     newRecordMsg.classList.add('hidden');
                 }
 
-                // שמירת ההתקדמות לשלב הבא
                 currentLevel++;
                 localStorage.setItem('bulkGameLevel', currentLevel);
 
@@ -508,7 +512,7 @@ function initGame() {
 
     wordFoundCount = 0;
     strikes = 0;
-    scoreElement.textContent = score; // השארת הניקוד הקודם (אם משחקים ברצף)
+    scoreElement.textContent = score;
     strikesElement.textContent = `0/${strikesToPenalty}`;
 
     document.querySelectorAll('.cell.hinted').forEach(c => c.classList.remove('hinted'));
@@ -528,20 +532,31 @@ function startGameFlow() {
         hasGameStarted = true;
         gameArea.classList.remove('hidden');
         hintBtn.classList.remove('hidden');
-        newGameBtn.textContent = 'משחק חדש מתאפס';
+        newGameBtn.textContent = 'משחק חדש (מתאפס)';
     } else {
-        // אם לחצו שוב על כפתור "משחק חדש מתאפס", הניקוד והשלב מתאפסים
         score = 0;
     }
     initGame();
 }
 
+// לוגיקת המודל של איפוס שלבים
 resetLevelBtn.addEventListener('click', () => {
-    if (confirm("האם אתה בטוח שברצונך לאפס את כל השלבים ולחזור לשלב 1?")) {
-        currentLevel = 1;
-        score = 0;
-        localStorage.setItem('bulkGameLevel', 1);
-        if (hasGameStarted) initGame();
+    resetModal.classList.remove('hidden');
+});
+
+cancelResetBtn.addEventListener('click', () => {
+    resetModal.classList.add('hidden');
+});
+
+confirmResetBtn.addEventListener('click', () => {
+    resetModal.classList.add('hidden');
+    currentLevel = 1;
+    score = 0;
+    localStorage.setItem('bulkGameLevel', 1);
+    if (hasGameStarted) {
+        initGame();
+    } else {
+        levelDisplayElement.textContent = currentLevel;
     }
 });
 
@@ -553,27 +568,25 @@ function shareScoreToWhatsApp() {
 updateBackground();
 
 newGameBtn.addEventListener('click', () => {
-    score = 0; // איפוס ניקוד כשמתחילים משחק יזום (לא רציף)
+    score = 0;
     startGameFlow();
 });
 
 categorySelect.addEventListener('change', () => {
     updateBackground();
     if (hasGameStarted) {
-        score = 0; // החלפת קטגוריה מאפסת את רצף הניקוד
+        score = 0;
         initGame();
     }
 });
 
 playAgainBtn.addEventListener('click', () => {
     victoryModal.classList.add('hidden');
-    // עוברים לשלב הבא עם הניקוד שנצבר
     initGame();
 });
 
 gameOverPlayAgainBtn.addEventListener('click', () => {
     gameOverModal.classList.add('hidden');
-    // אם נפסלו, הניקוד מתאפס אבל נשארים באותו שלב לנסות שוב
     score = 0;
     initGame();
 });

@@ -27,7 +27,7 @@
         </select>
         <button id="new-game-btn" class="neon-btn">התחל משחק</button>
         <button id="hint-btn" class="neon-btn hint-btn hidden">💡 רמז</button>
-        <button id="reset-level-btn" class="neon-btn" style="border-color: #aaa; color: #aaa; font-size: 12px; padding: 5px 10px;">🔄 איפוס שלבים</button>
+        <button id="reset-level-btn" class="neon-btn" style="border-color: #aaa; color: #aaa;">🔄 איפוס שלבים</button>
     </div>
 
     <div id="game-area" class="hidden">
@@ -47,7 +47,7 @@
 <div id="victory-modal" class="modal hidden">
     <div class="modal-content">
         <h2>🏆 כל הכבוד! 🏆</h2>
-        <p>סיימת את השלב בהצלחה!</p>
+        <p>סיימת את <span style="color: #FFD700; font-weight: bold;">שלב <span id="victory-level"></span></span> בהצלחה!</p>
         <p>ניקוד מצטבר: <span id="final-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
         <p id="new-record-msg" class="hidden">🎉 שיא חדש! 🎉</p>
         <div class="modal-buttons">
@@ -60,11 +60,22 @@
 <div id="game-over-modal" class="modal hidden">
     <div class="modal-content" style="border-color: #FF0055; box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);">
         <h2 style="color: #FF0055; text-shadow: 0 0 10px #FF0055;">⏳ נגמר הזמן! ⏳</h2>
-        <p>הזמן עבר והמשחק הסתיים.</p>
+        <p>הזמן עבר והמשחק ב<span style="color: #FFD700; font-weight: bold;">שלב <span id="game-over-level"></span></span> הסתיים.</p>
         <p>ניקוד סופי: <span id="game-over-score" style="color: #00FFAA; font-weight: bold; font-size: 24px;">0</span></p>
         <div class="modal-buttons">
             <button id="game-over-play-again-btn" class="neon-btn" style="border-color: #FF0055; color: #FF0055; box-shadow: 0 0 15px rgba(255,0,85,0.3);">נסה את השלב שוב</button>
             <button id="share-wa-gameover" class="neon-btn wa-btn">שתף תוצאה בוואטסאפ 🟢</button>
+        </div>
+    </div>
+</div>
+
+<div id="reset-modal" class="modal hidden">
+    <div class="modal-content" style="border-color: #FF8C00; box-shadow: 0 0 30px rgba(255, 140, 0, 0.4);">
+        <h2 style="color: #FF8C00; text-shadow: 0 0 10px #FF8C00;">⚠️ איפוס משחק ⚠️</h2>
+        <p>האם אתה בטוח שברצונך לאפס את כל השלבים והניקוד ולחזור לשלב 1?</p>
+        <div class="modal-buttons row-buttons">
+            <button id="confirm-reset-btn" class="neon-btn" style="border-color: #FF0055; color: #FF0055;">כן, אפס</button>
+            <button id="cancel-reset-btn" class="neon-btn" style="border-color: #aaa; color: #aaa;">ביטול</button>
         </div>
     </div>
 </div>
