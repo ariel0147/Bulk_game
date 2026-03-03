@@ -21,7 +21,7 @@ const backgrounds = {
     food: 'url("https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2000&auto=format&fit=crop")',
     animals: 'url("https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2000&auto=format&fit=crop")',
     tools: 'url("https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=2000&auto=format&fit=crop")',
-    countries: 'url("https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=2000&auto=format&fit=crop")',
+    countries: 'url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop")',
     medicine: 'url("https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2000&auto=format&fit=crop")',
     names: 'url("https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2000&auto=format&fit=crop")',
     languages: 'url("https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=2000&auto=format&fit=crop")',
@@ -483,7 +483,7 @@ function checkSelectedWord() {
     selectedCells = [];
 }
 
-// מערכת הרמזים המשודרגת שחושפת את כל הנתיב של המילה
+// מערכת הרמזים המשודרגת לפי רמות קושי
 hintBtn.addEventListener('click', () => {
     if (!isGameActive) return;
 
@@ -493,7 +493,7 @@ hintBtn.addEventListener('click', () => {
     });
 
     if (unfoundWords.length > 0) {
-        // קנס זמן על רמז שמגלה את כל המילה
+        // קנס זמן על רמז (אפשר לשנות לפי הצורך)
         applyTimePenalty(15);
 
         const randomWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
@@ -521,13 +521,30 @@ hintBtn.addEventListener('click', () => {
                 }
             }
 
-            // הפעלת ההבהוב על כל תאי המילה ביחד
-            cellsToHint.forEach(cell => cell.classList.add('hinted'));
+            // ---- התאמת הרמז לרמת הקושי ----
+            let cellsToShow = [];
+
+            if (currentLevel <= 3) {
+                // שלבים קלים (1-3): מראה את כל המילה
+                cellsToShow = cellsToHint;
+            } else if (currentLevel <= 7) {
+                // שלבים בינוניים (4-7): מראה 2 אותיות אקראיות מתוך המילה
+                const numToReveal = Math.min(2, cellsToHint.length);
+                const shuffled = [...cellsToHint].sort(() => 0.5 - Math.random());
+                cellsToShow = shuffled.slice(0, numToReveal);
+            } else {
+                // שלבים קשים (8 ומעלה): מראה אות אחת בלבד באופן אקראי
+                const shuffled = [...cellsToHint].sort(() => 0.5 - Math.random());
+                cellsToShow = shuffled.slice(0, 1);
+            }
+
+            // הפעלת ההבהוב רק על התאים שנבחרו לפי הרמה
+            cellsToShow.forEach(cell => cell.classList.add('hinted'));
             playSound('tick');
 
             // הסרת ההבהוב אחרי שניה וחצי
             setTimeout(() => {
-                cellsToHint.forEach(cell => cell.classList.remove('hinted'));
+                cellsToShow.forEach(cell => cell.classList.remove('hinted'));
             }, 1500);
         }
     }
